@@ -1,0 +1,436 @@
+БД TB
+Тема туры 
+Tour (id int, TicketCount int, Name nvarchar(100), Description nvarchar(MAX), ImagePreview varbinary(MAX), Price money, IsActual bit) (первая строка первич ключ)
+Type (id int, Name nvarchar(100), Description nvarchar(MAX)) (первая строка первич ключ)
+HotelImage (id int, Hotelid int, ImageSourse varbinary(MAX)) (первая строка первич ключ)
+HotelComment(id int, Hotelid int, Text nvarchar(MAX), Author nvarchar(100), CreationDate date) (первая строка первич ключ)
+Country (Code nchar(2), Name nvarchar(100)) (первая строка первич ключ)
+Hotel (id int, Name nvarchar(100), CountOfStars int, CountCode nchar(2)) (первая строка первич ключ)
+Созданные табл для связей с другими
+TypeOfTour (Tourid int, Typeid int) (оба первичные ключи)
+HotelOfTour (Hotelid int, Tourid int) (оба первичные ключи)
+
+СВЯЗИ
+Country Hotel(Code CountCode)
+Hotel HotelComment (  id Hotelid )
+Hotel HotelImage   (id Hotelid)
+Type TypeOfTour (id Typeid)
+Tour TypeOfTour (id Tourid)
+Hotel HotelOfTour (id Hotelid)
+Type HotelOfTour (id Tourid)
+
+
+Загружай БД в VS
+Кликни на пропертис в VS и добавь ресурсы фото (в действие при сборке ставишь ресурс)
+В Фрейме главного окна пропиши это чтобы скрыть визуальное меню NavigationUIVisibility="Hidden"
+
+Создай регистрацию и авторизацию (применялась другая БД , надо делать все в одной, все тоже самое ток добавь еще таблицу)
+создай БД для регистрации (id, login, password, name, IdRole)
+
+создай папку Дата и все туды. Апп конект, Апп фрейм тоже туда и пропиши этот код
+ public static (eczamenEntities-имя бд) modelOdb; (подкл к бд)
+Потом создай фрейм для перехода стр назови его FrmMain и скрой его.
+Потом в АПП фрейм пропиши это public static Frame frameMain;.
+Потом в кс код главного окна подкл их
+AppConnect.modelOdb = new eczamenEntities();
+AppFrame.frameMain = (vhod имя фрейма);
+vhod.Navigate(new lonig_V()); это для отображения сразу фрейма
+Код для авторизации и регистрации визуал
+<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Label Content="Введите логин" />
+            <TextBox Text="" x:Name="txbLogin"/>
+            <Label Content="Введите пароль" />
+            <PasswordBox x:Name="psbPassword"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="Войти" x:Name="vhod" Click="vhod_Click" Style="{StaticResource ButtonG}"/>
+                <Button Content="Регистрация" x:Name="registr" Click="registr_Click" Style="{StaticResource ButtonG}"/>
+            </StackPanel>
+        </StackPanel>
+
+<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Label Content="Введите имя"/>
+                <TextBox x:Name="txbName" Width="120"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Label Content="Введите Логин"/>
+                <TextBox x:Name="txbLogin" Width="120"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Label Content="Введите Пароль"/>
+                <StackPanel>
+                    <TextBox x:Name="txbPass" Text="" Width="120"/>
+                    <PasswordBox x:Name="psbPass" PasswordChanged="PasswordBox_PasswordChanged"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="btnBack" Content="Назад" Style="{StaticResource ButtonG}" Click="btnBack_Click"/>
+                <Button x:Name="registr" Content="Создать" IsEnabled="False" Click="registr_Click" Style="{StaticResource ButtonG}" />
+            </StackPanel>
+        </StackPanel>
+
+ПРИМЕР АПП СТИЛЯ
+<Style TargetType="TextBox" x:Key="Title">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13pt"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="15"/>
+        </Style>
+
+
+КОД ДЛЯ ОБРАБОТЧИКА ВХОДА (имя таблицы сравни! и также данные типо логина все должно совпасть и не забудь про имена этих данных в коде визуала)
+{
+            try
+            {
+                var userObj = AppConnect.modelOdb.polzovatel.FirstOrDefault(x => x.login == txbLogin.Text && x.password == psbPassword.Password);
+                    if (userObj == null)
+                {
+                    MessageBox.Show("Такого пользователя нет", "Ошибка", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                    else
+                {
+                    switch (userObj.IdRole)
+                    {
+                        case 1:
+                            MessageBox.Show("Здравствуйте препод" + userObj.name + "!"
+                                );
+                            break;
+                        case 2:
+                            MessageBox.Show("Здравствуйте кто то" + userObj.name + "!"
+                                );
+                            break;
+                    }
+                }
+            }
+            catch (Exception Ex)
+            {
+                MessageBox.Show("Ошибка" + Ex.Message.ToString() + "Критическая"
+                    );
+            }
+        }
+
+
+Код для кнопки назад
+private void btnBack_Click(object sender, RoutedEventArgs e)
+        {
+            AppFrame.frameMain.GoBack();
+        }
+
+Код для перехода на другой фрейм
+private void registr_Click(object sender, RoutedEventArgs e)
+        {
+            AppFrame.frameMain.Navigate(new Registr());
+        }
+
+В РЕГИСТРАЦИИ ПРОВЕРЬ ЧТОБЫ КНОПКА НАЗАД БЫЛА НЕ АКТИВ ВОТ КОД IsEnabled="False"
+
+ЭТОТ КОД ИДЕТ К ПАССВОРД ЧЕНДЖ ДЛЯ АКТИВАЦИИ КНОПКИ 
+private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (psbPass.Password != txbPass.Text)
+            {
+                registr.IsEnabled = false;
+                psbPass.Background = Brushes.Aqua;
+                psbPass.BorderBrush = Brushes.Red;
+            }
+            else
+            {
+                registr.IsEnabled = true;
+                psbPass.Background = Brushes.Gray;
+                psbPass.BorderBrush = Brushes.Green;
+            }
+        }
+
+
+КОД ДЛЯ КНОПКИ СОЗДАНИЯ АКК
+private void registr_Click(object sender, RoutedEventArgs e)
+        {
+            if (AppConnect.modelOdb.polzovatel.Count(x => x.login==txbLogin.Text)>0)
+            {
+                MessageBox.Show("ТАкой пользователь уже есть");
+                return;
+            }
+            try
+            {
+                polzovatel userObj = new polzovatel()
+                {
+                    login = txbLogin.Text,
+                    name =txbName.Text,
+                    password = txbPass.Text,
+                    IdRole = 2
+                };
+                AppConnect.modelOdb.polzovatel.Add(userObj);
+                AppConnect.modelOdb.SaveChanges();
+                MessageBox.Show("Данные сохранены");
+            }
+            catch
+            {
+                MessageBox.Show("Ошибка при сохранении");
+            }
+        }
+
+
+ВЫВОД ДАННЫХ ИЗ БД
+Зайди в контекст БД и пропиши это 
+private static Test123Entities _context; перед public Test123Entities()
+Потом пропиши это  после public Test123Entities()
+
+public static Test123Entities GetContext()
+        {
+            if (_context == null)
+                _context = new Test123Entities();
+            return _context;
+        }
+
+Потом создай окно и пропиши там фрейм
+<Frame Name="bazaGrid" Grid.Row="1"/>
+Создай папку где будет храниться АПП фрейм вот код
+public static Frame BazaFraim { get; set; }
+
+    В странице где будет вывод
+<DataGrid Name="gridHotels" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Название отеля" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Количество звезд" Binding="{Binding CountOfStars}" Width="150"/>
+                <DataGridTextColumn Header="Страна" Binding="{Binding Country.Name}" Width="250"/>
+                <DataGridTemplateColumn Width="auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="редактировать" Name="BtnEdit" Click="BtnEdit_Click"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+ <Button Content="редактировать" Name="BtnEdit" Click="BtnEdit_Click"/> Кнопка которая будет редактировать данные 
+Потом обработчик страницы и пишешь это в инициализации  gridHotels.ItemsSource = Test123Entities.GetContext().Hotel.ToList(); 
+В обработчике окна где выводится БД пропиши фрейм
+AppFrame.BazaFraim = bazaGrid;
+bazaGrid.Navigate(new magazineBaza());
+
+
+Пример кода перехода при авторизации на другое окно
+var myWindow = Window.GetWindow(this);
+                            administrator administrator = new administrator();
+                            administrator.Show();
+                            myWindow.Close();
+
+
+
+
+
+ПРОВЕРЯЙ ВЫВОД!! 
+Создай кнопки удаления, добавления данных
+код для перехода на страницу где будет идти добавление чего то  
+AppFrame.MainFrame.Navigate(new AddEditPafe()); MainFrame (Имя фрейма в AppFrame)
+Вот пример кода интерфейса добавления
+
+<Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="227*"/>
+            <ColumnDefinition Width="573*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Назание"/>
+        <TextBlock Text="Количество звезд" Grid.Row="1"/>
+        <TextBlock Text="Страна" Grid.Row="2"/>
+
+        <TextBox Text="{Binding Name}" (в биндинге прописывай то к чему идет привязка, тут к имени отеля ниже его звезды) MaxLength="100" Grid.Column="1" Height="30" Width="150"/>
+        <TextBox Text="{Binding CountOfStars}" Grid.Column="1" Grid.Row="1" Height="30" Width="150"/>
+        <ComboBox SelectedItem="{Binding Country}" Name="ComboCountries" DisplayMemberPath="Name" Grid.Row="2" Grid.Column="1" />
+
+        <Button Content="Сохранить" Grid.Column="1" Grid.Row="3" Name="BtnSave" Click="BtnSave_Click"/>
+    </Grid>
+
+
+
+В обработчике страницы добавления пропиши это 
+private Hotel _currentHotel = new Hotel(); до инициализации перед паблик
+Потом пропиши это в инициализации  
+DataContext = _currentHotel;
+и потом это ComboCounties.ItemsSource = Test123Entities.GetContext().Country.ToList(); (если есть комбо бокс)
+
+Пропиши этот код для обработчика кнопки сейв это проверка ошибок заполнении полей и добавления данных
+StringBuilder errors = new StringBuilder();
+
+          StringBuilder errors = new StringBuilder();
+
+            if (string.IsNullOrEmpty(_currentHotel.Name))
+                errors.AppendLine("Укажи название отеля");
+            if (_currentHotel.CountOfStars < 1 || _currentHotel.CountOfStars > 5)
+                errors.AppendLine("Укажите звезды от 1 до 5");
+            if (_currentHotel.Country == null)
+                errors.AppendLine("Укажите страну");
+
+            if (errors.Length > 0)
+            {
+                MessageBox.Show(errors.ToString());
+                return;
+            }
+
+
+ if (_currentHotel.Id == 0)
+                Test123Entities.GetContext().Hotel.Add(_currentHotel);
+            try
+            {
+                Test123Entities.GetContext().SaveChanges();
+                MessageBox.Show("Данные сохранены");
+                AppFrame.MainFrame.GoBack();
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+
+
+
+Зайди на страницу где выгружается БД и пропиши в тайтл это IsVisibleChanged и создай новое событие (оно обновляет данные автоматически)
+И пропиши этот код в это новое событие это для обновления данных
+if (Visibility == Visibility.Visible) 
+            {
+                Test123Entities.GetContext().ChangeTracker.Entries().ToList().ForEach(p=>p.Reload());
+                gridHotels.ItemsSource = Test123Entities.GetContext().Hotel.ToList();
+            }
+
+
+ПРОВЕРЬ ДОБАВЛЕНИЕ НОВЫХ ОТЕЛЕЙ ДОЛЖНО ВСЕ КОРРЕКТНО РАБОТАТЬ
+
+
+РЕДАКТИРОВАНИЕ ЗАПИСЕЙ
+
+В public pageAddBD (название страницы добавления там инициализация пропиши этот код Hotel selectedHotel) там где селектед пиши от темы в итоге выглядеть должен так
+public pageAddBD(Hotel selectedHotel)
+
+в инициализацию пропиши это
+
+            if (selectedHotel != null)
+                _currentHotel = selectedHotel;
+
+в итоге выглядет так
+
+public pageAddBD(Hotel selectedHotel)
+        {
+            InitializeComponent();
+
+            if (selectedHotel != null)
+                _currentHotel = selectedHotel;
+
+            DataContext = _currentHotel;
+            ComboCountries.ItemsSource = dataBazeEntities.GetContext().Country.ToList();
+        }
+
+
+дальше будет ошибка перейди на страницу где вывод бд в коде где кнопка перехода на страницу добавления пропиши это
+null вот как  в итоге выглядит 
+private void BtnNew_Click(object sender, RoutedEventArgs e)
+        {
+            AppFrameBD.BazaFraim.Navigate(new pageAddBD(null));
+        }
+
+
+Далее в кнопке редактирования пропиши это
+это переход на туже страницу добавления только дляизменения данных
+AppFrameBD.BazaFraim.Navigate(new pageAddBD((sender as Button).DataContext as Hotel));
+
+
+Проверь редактирование должно работать
+
+
+Код для кнопки удаления
+
+var hotelsForRemove = gridHotels.SelectedItems.Cast<Hotel>().ToList();
+
+            if (MessageBox.Show($"Вы точно хотите удалить? {hotelsForRemove.Count()} элементов", "Внимание", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    dataBazeEntities.GetContext().Hotel.RemoveRange(hotelsForRemove);
+                    dataBazeEntities.GetContext().SaveChanges();
+                    MessageBox.Show("Данные удалены");
+
+                    gridHotels.ItemsSource = dataBazeEntities.GetContext().Hotel.ToList(); (это обновления данных)
+                }
+                    catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message.ToString());
+                }
+            }
+МЕЛОЧИ НО СДЕЛАЙ
+добавь иконку программы
+проект - свйоства проекта имя, потом приложение и значок манифест (наверно лучше расширение ico)
+
+
+ТЕСТ КЕЙСЫ надо сделать 5штук минимум наверно
+
+Наименование проекта	
+Наименование проекта
+
+Номер версии	
+Версия проекта (первый номер можно принять как 1.0)
+
+Имя тестера	
+Имя тестера, который выполнял эти тесты
+
+Даты тестирования
+Даты когда проводили тестирование – это может быть один тест или несколько. Если тесты проводили через большие промежутки времени, дата тестирования может определяются отдельными тест кейсами
+
+
+Test Case #	
+Уникальный ID для каждого test case.Следуйте определенной логике именования и нумерации. например ‘TC_UI_1′ указание на  ‘пользовательский интерфейс test case #1′.
+
+Приоритет тестирования (Малый/Средний/высокий)	
+Насколько важен каждый тест. Приоритет при испытании бизнес-правил или функционала может быть средним или высоким, в то время как незначительные формы пользовательского интерфейса могут быть с низким приоритетом.
+
+Название тестирования/Имя	
+Название тестирования. Например, проверка формы авторизации с правильным логином и паролем.
+
+Резюме испытания	
+Описание, чего нужно достигнуть при тестировании.
+
+Шаги тестирования	
+Перечислите детально все шаги тестирования. Напишите в каком порядке должны быть выполнены эти шаги. Убедитесь что вы обеспечили настолько максимальную детализацию насколько можете. Нумерованный список – будет хорошей идей. 
+
+Данные тестирования	
+Тестовые данные используемые для этого тестирования. Таким образом актуальные данные, которые будут предложены будут использоваться для проведения тестирования. Например логин и пароль – для входа в систему.
+
+Ожидаемый результат	
+Опишите подробно ожидаемый результат включая любые сообщения и ошибки, которые должны быть выданы на экран.
+
+Фактический результат	
+Какой фактический результат после выполнения теста? Опишите любое соответствующее поведение системы после выполнения тестирования.
+
+Предпосылки	
+Любые предварительные действия, которые должны быть выполнены перед проведением тестирования. Перечислите предварительные условия, для успешного выполнения проекта.
+
+Постусловия	
+Какое состояние должно быть у системы после выполнения тестирования?
+
+Статус (Pass/Fail)	
+Если фактический результат не соответствует ожидаемым результатам отметка, что тест провалился (fail). В противном случае как прошло (pass).
+
+Комментарии	
+Используйте эту область для любых дополнительных записей или комментариев. Это область нужна для поддержки полей выше (например есть какие-то особые условия, которые не могут быть описаны ни в одном из полей или есть вопросы связанные с ожидаемыми или фактическими результатами).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
