@@ -184,7 +184,7 @@ public static Test123Entities GetContext()
         }
 
 Потом создай окно и пропиши там фрейм
-<Frame Name="bazaGrid" Grid.Row="1"/>
+<Frame Name="bazaGrid" Grid.Row="1" NavigationUIVisibility="Hidden"/>
 Создай папку где будет храниться АПП фрейм вот код
 public static Frame BazaFraim { get; set; }
 
